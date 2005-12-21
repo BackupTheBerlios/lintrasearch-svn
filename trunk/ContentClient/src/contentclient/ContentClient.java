@@ -13,7 +13,8 @@ package contentclient;
 import java.util.*;
 import java.io.*;
 
-import org.jdom.Element;
+import org.jdom.*;
+import org.jdom.xpath.*;
 
 import contentclient.MainWindow;
 import org.linoratix.configfilereader.ConfigFileReader;
@@ -25,12 +26,15 @@ import org.linoratix.configfilereader.ConfigFileReader;
 public class ContentClient {
     protected ConfigFileReader konfiguration = null;
     
+    protected MainWindow mWindow = null;
+    
     /** Creates a new instance of ContentClient */
     public ContentClient(String konfigurations_datei) {
         konfiguration = new ConfigFileReader(konfigurations_datei);
         
+        mWindow = new MainWindow(konfigurations_datei);
+        mWindow.setVisible(true);
         new Indexer().start();
-        new MainWindow(konfigurations_datei).setVisible(true);
     }
     
     /**
@@ -43,7 +47,11 @@ public class ContentClient {
     
     
     class Indexer extends Thread {
+        protected ArrayList indexFeatures = null;
+        
         public void run() {
+            checkFeatures();
+            
             List verzeichnisse = konfiguration.getList("/lintra/indexer/path");
             
             for(int i=0; i<verzeichnisse.size(); i++) {
@@ -52,12 +60,34 @@ public class ContentClient {
             }
         }
         
-        protected void indexVerzeichnis(String dir) {
+        private void indexVerzeichnis(String dir) {
             if(konfiguration.get("/lintra/develop/debug").equalsIgnoreCase("1") == true) {
                 System.out.println(">> Indexing: " + dir);
             }
-            
-            
+        }
+        
+        private void checkFeatures() {
+            Element root = new Element("lintra");
+            Element action = new Element("action");
+            action.setText("indexfeatures");
+            root.addContent(action);
+
+            Document doc = new Document(root);
+
+            Document recDoc = mWindow.sendRequest(doc);
+
+            try {
+                List mimetypes = XPath.selectNodes(recDoc, "/lintra/indexfeatures/mimetype");
+                Iterator iter = mimetypes.iterator();
+
+                while(iter.hasNext()) {
+                    Element child = (Element)iter.next();
+                    Element suffix = child.getChild("suffix");
+                    System.out.println("Suffix: " + suffix.getText());
+                }
+            } catch(JDOMException e) {
+                System.err.println("Fehler beim XML: " + e);
+            }
         }
     }
 }

@@ -70,7 +70,7 @@ public class ContentServer {
         Socket clientSocket = null;
         
         try {
-            sock = new ServerSocket(1055);
+            sock = new ServerSocket(new Integer(konfiguration.get("/lintra/server/port")));
             
             System.out.println("ContentServer started...");
             
@@ -95,6 +95,8 @@ public class ContentServer {
         if(action.getText().equalsIgnoreCase("search") == true) {
             // es soll gesucht werden
            retDocument = searchDB((Element)children.get(1));
+        } else if(action.getText().equalsIgnoreCase("indexfeatures") == true) {
+           retDocument = getIndexFeatures();
         }
         
         return retDocument;
@@ -190,7 +192,7 @@ public class ContentServer {
         return retDocument;
     }
     
-    protected void listPlugins() {
+    private void listPlugins() {
         List plugin_list = konfiguration.getList("/lintra/plugins/mimetype/plugin");
         Iterator iter = plugin_list.iterator();
         
@@ -217,8 +219,61 @@ public class ContentServer {
         System.out.println("");
     }
     
-    protected void IndexDocument(Element docToIndex) {
+    private void IndexDocument(Element docToIndex) {
         
+    }
+    
+    private Document getIndexFeatures() {
+        Document retDocument = null;
+        
+        Element root = new Element("lintra");
+        Element action = new Element("action");
+        action.setText("indexfeatures");
+        root.addContent(action);
+        
+        Element indexfeatures = new Element("indexfeatures");
+        
+        List plugin_list = konfiguration.getList("/lintra/plugins/mimetype/plugin");
+        Iterator iter = plugin_list.iterator();
+        
+        while(iter.hasNext()) {
+            Element plugin = (Element)iter.next();
+            MimeTypePlugin mtp = null;
+            
+            try {
+                Class MimeTypePluginClass = Class.forName(plugin.getText());
+                Object MimeTypePluginObject = MimeTypePluginClass.newInstance();
+                mtp = (MimeTypePlugin)MimeTypePluginObject;
+            } catch(Exception e) {
+                System.err.println("Konnte Plugin nicht laden: " + e);
+            }
+            
+            Element eMimeType = new Element("mimetype");
+            ArrayList l = (ArrayList)mtp.getMimeType();
+            Iterator i = l.iterator();
+            
+            while(i.hasNext()) {
+                MimeType m = (MimeType)i.next();
+                
+                Element rSuffix = new Element("suffix");
+                rSuffix.setText(m.getSuffix());
+                Element rMimeType = new Element("mimetype");
+                rMimeType.setText(m.getMimeType());
+                
+                eMimeType.addContent(rSuffix);
+                eMimeType.addContent(rMimeType);
+            }
+            
+            indexfeatures.addContent(eMimeType);
+            
+            eMimeType = null;
+        }
+        
+        root.addContent(indexfeatures);
+        
+        retDocument = new Document(root);
+        
+        return retDocument;
     }
     
     /**

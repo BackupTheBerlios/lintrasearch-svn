@@ -15,6 +15,7 @@ import java.awt.event.*;
 import javax.swing.*;
 
 import org.jdom.*;
+import org.jdom.xpath.*;
 import org.jdom.input.SAXBuilder;
 import org.jdom.output.XMLOutputter;
 
@@ -95,6 +96,8 @@ public class MainWindow extends javax.swing.JFrame {
         jMenuBar1 = new javax.swing.JMenuBar();
         mnuDatei = new javax.swing.JMenu();
         mnuDateiBeenden = new javax.swing.JMenuItem();
+        mnuExtras = new javax.swing.JMenu();
+        mnuExtrasTestFeatures = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         addComponentListener(new java.awt.event.ComponentAdapter() {
@@ -176,11 +179,38 @@ public class MainWindow extends javax.swing.JFrame {
 
         jMenuBar1.add(mnuDatei);
 
+        org.openide.awt.Mnemonics.setLocalizedText(mnuExtras, "&Extras");
+        org.openide.awt.Mnemonics.setLocalizedText(mnuExtrasTestFeatures, "&Features Testen");
+        mnuExtrasTestFeatures.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mnuExtrasTestFeaturesActionPerformed(evt);
+            }
+        });
+
+        mnuExtras.add(mnuExtrasTestFeatures);
+
+        jMenuBar1.add(mnuExtras);
+
         setJMenuBar(jMenuBar1);
 
         pack();
     }
     // </editor-fold>//GEN-END:initComponents
+
+    private void mnuExtrasTestFeaturesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuExtrasTestFeaturesActionPerformed
+        Element root = new Element("lintra");
+        Element action = new Element("action");
+        action.setText("indexfeatures");
+        root.addContent(action);
+        
+        Document doc = new Document(root);
+
+        Document recDoc = sendRequest(doc);
+        
+        Element recRoot = recDoc.getRootElement();
+        List recChildren = recRoot.getContent();
+        
+    }//GEN-LAST:event_mnuExtrasTestFeaturesActionPerformed
 
     private void pnlScrollAnswersMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_pnlScrollAnswersMouseWheelMoved
         if(evt.getWheelRotation() > 0)
@@ -210,7 +240,37 @@ public class MainWindow extends javax.swing.JFrame {
         root.addContent(search);
         
         Document doc = new Document(root);
-        Document recDoc;
+        Document recDoc = sendRequest(doc);
+        
+        Element recRoot = recDoc.getRootElement();
+        List recChildren = recRoot.getContent();
+        // -- das 1. ist immer die action
+        // Element recAction = (Element)recChildren.get(0);
+
+        // erstmal alles was angezeigt wird entfernen
+        e_list.removeAll();
+
+        Element recSearch = (Element)recChildren.get(1);
+        listSearchResult(recSearch);
+
+        resizeElements();
+
+    }//GEN-LAST:event_btnSuchenActionPerformed
+
+    private void btnSucheSpeichernActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSucheSpeichernActionPerformed
+
+    }//GEN-LAST:event_btnSucheSpeichernActionPerformed
+
+    private void mnuDateiBeendenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuDateiBeendenActionPerformed
+        System.exit(0);
+    }//GEN-LAST:event_mnuDateiBeendenActionPerformed
+
+    private void mnuDateiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuDateiActionPerformed
+// TODO add your handling code here:
+    }//GEN-LAST:event_mnuDateiActionPerformed
+    
+    public Document sendRequest(Document doc) {
+        Document recDoc = null;
         
         SAXBuilder xml_builder = null;
         xml_builder = new SAXBuilder();
@@ -252,20 +312,6 @@ public class MainWindow extends javax.swing.JFrame {
             }
             /// -----------
             
-            Element recRoot = recDoc.getRootElement();
-            List recChildren = recRoot.getContent();
-            Element recAction = (Element)recChildren.get(0);
-            
-            if(recAction.getText().equalsIgnoreCase("search") == true) {
-                // erstmal alles was angezeigt wird entfernen
-                e_list.removeAll();
-                
-                Element recSearch = (Element)recChildren.get(1);
-                listSearchResult(recSearch);
-            }
-
-            resizeElements();
-            
             os.close();
             is.close();
             sock.close();
@@ -274,19 +320,9 @@ public class MainWindow extends javax.swing.JFrame {
         } catch(IOException e) {
             System.err.println(e);
         }
-    }//GEN-LAST:event_btnSuchenActionPerformed
-
-    private void btnSucheSpeichernActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSucheSpeichernActionPerformed
-
-    }//GEN-LAST:event_btnSucheSpeichernActionPerformed
-
-    private void mnuDateiBeendenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuDateiBeendenActionPerformed
-        System.exit(0);
-    }//GEN-LAST:event_mnuDateiBeendenActionPerformed
-
-    private void mnuDateiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mnuDateiActionPerformed
-// TODO add your handling code here:
-    }//GEN-LAST:event_mnuDateiActionPerformed
+        
+        return recDoc;
+    }
     
     private void resizeElements() {
         pnlScrollAnswers.setSize(pnlAnswers.getWidth(), e_list.getHeight() + 10);
@@ -367,6 +403,8 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel lblStatusBar;
     private javax.swing.JMenu mnuDatei;
     private javax.swing.JMenuItem mnuDateiBeenden;
+    private javax.swing.JMenu mnuExtras;
+    private javax.swing.JMenuItem mnuExtrasTestFeatures;
     private javax.swing.JPanel pnlAnswers;
     private javax.swing.JPanel pnlMain;
     private javax.swing.JPanel pnlScrollAnswers;
