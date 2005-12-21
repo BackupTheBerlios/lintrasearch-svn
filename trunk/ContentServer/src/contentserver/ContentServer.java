@@ -34,20 +34,34 @@ public class ContentServer {
     
     protected Connection sql_connection = null;
     
+    protected ConfigFileReader konfiguration = null;
+    
     /**
      * Creates a new instance of ContentServer 
      */
-    public ContentServer() {
-        // MySQL Treiber laden
-        try {
-            Class.forName("com.mysql.jdbc.Driver").newInstance();
-        } catch (Exception e) {
-            System.err.println("Fehler bei Treiberinitialisierung: " + e);
-        }
-        try {
-            sql_connection = DriverManager.getConnection("jdbc:mysql://localhost/lintrasearch?user=lintra&password=test");
-        } catch(SQLException e) {
-            System.err.println("SQL Fehler: " + e);
+    public ContentServer(String konfigurations_datei, boolean only_list) {
+        konfiguration = new ConfigFileReader(konfigurations_datei);
+        
+        if(only_list) {
+            listPlugins();
+            System.exit(0);
+        } else {
+            // MySQL Treiber laden
+            try {
+                Class.forName("com."+ konfiguration.get("/lintra/db/type") +".jdbc.Driver").newInstance();
+            } catch (Exception e) {
+                System.err.println("Fehler bei Treiberinitialisierung: " + e);
+            }
+            try {
+                sql_connection = DriverManager.getConnection("jdbc:"+
+                        konfiguration.get("/lintra/db/type")+"://"+
+                        konfiguration.get("/lintra/db/server")+"/"+
+                        konfiguration.get("/lintra/db/name")+"?user="+
+                        konfiguration.get("/lintra/db/user")+"&password="+
+                        konfiguration.get("/lintra/db/password"));
+            } catch(SQLException e) {
+                System.err.println("SQL Fehler: " + e);
+            }
         }
     }
     
@@ -177,7 +191,30 @@ public class ContentServer {
     }
     
     protected void listPlugins() {
+        List plugin_list = konfiguration.getList("/lintra/plugins/mimetype/plugin");
+        Iterator iter = plugin_list.iterator();
         
+        System.out.println("MimeTypePlugins:");
+        System.out.println("--------------------------------------------------------------------------------");
+        
+        while(iter.hasNext()) {
+            Element plugin = (Element)iter.next();
+            MimeTypePlugin mtp = null;
+            
+            try {
+                Class MimeTypePluginClass = Class.forName(plugin.getText());
+                Object MimeTypePluginObject = MimeTypePluginClass.newInstance();
+                mtp = (MimeTypePlugin)MimeTypePluginObject;
+            } catch(Exception e) {
+                System.err.println("Konnte Plugin nicht laden: " + e);
+            }
+            
+            System.out.println("Name: " + plugin.getText());
+            System.out.println("MimeType(s): " + mtp.getMimeType().toString());
+        }
+        
+        System.out.println("--------------------------------------------------------------------------------");
+        System.out.println("");
     }
     
     protected void IndexDocument(Element docToIndex) {
@@ -188,7 +225,12 @@ public class ContentServer {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        new ContentServer().runServer();
+        if(args.length > 1) {
+            if(args[1].equalsIgnoreCase("--listPlugins") == true)
+                new ContentServer(args[0], true).runServer();
+        } else {
+            new ContentServer(args[0], false).runServer();
+        }
     }  
 
     /********************************************/

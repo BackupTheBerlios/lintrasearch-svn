@@ -17,13 +17,12 @@ import java.util.*;
  * @author jfried
  */
 public abstract class MimeTypePlugin {
-    
     // In dieser Methode werden die MimeTypes bekannt gegeben
-    public List getMimeType() {
+    public ArrayList getMimeType() {
         return null;
     }
     
-    public String getContent() {
+    public String getContent(byte[] _content) {
         return null;
     }
 }
