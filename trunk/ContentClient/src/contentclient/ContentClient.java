@@ -78,7 +78,15 @@ public class ContentClient {
                 if(dateien[i].isDirectory()) {
                     indexVerzeichnis(dateien[i].getPath());
                 } else {
-                    System.out.println(">> Indexing [f]: " + dateien[i].getPath());
+                    Document doc = null;
+                    
+                    Element root = new Element("lintra");
+                    Element action = new Element("action");
+                    action.setText("indexfile");
+                    root.addContent(action);
+                    
+                    Element indexfile = new Element("indexfile");
+                    
                 }
             }
         }
