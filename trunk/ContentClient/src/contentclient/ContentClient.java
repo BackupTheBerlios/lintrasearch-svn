@@ -25,7 +25,6 @@ import org.linoratix.configfilereader.ConfigFileReader;
  */
 public class ContentClient {
     protected ConfigFileReader konfiguration = null;
-    
     protected MainWindow mWindow = null;
     
     /** Creates a new instance of ContentClient */
@@ -61,12 +60,31 @@ public class ContentClient {
         }
         
         private void indexVerzeichnis(String dir) {
+            try {
+                // jedes verzeichnis wird erst mit ner halben sekunde verzoegerung durchwandert
+                // die lasst vom system nehmen
+                Thread.sleep(500);
+            } catch(InterruptedException iEx) {
+                System.err.println("Konnte einfach nicht warten...");
+            }
+            
             if(konfiguration.get("/lintra/develop/debug").equalsIgnoreCase("1") == true) {
                 System.out.println(">> Indexing: " + dir);
+            }
+            
+            File[] dateien = new java.io.File(dir).listFiles(new OnlyAcceptedFiles());
+            
+            for(int i = 0; i < dateien.length; i++) {
+                if(dateien[i].isDirectory()) {
+                    indexVerzeichnis(dateien[i].getPath());
+                } else {
+                    System.out.println(">> Indexing [f]: " + dateien[i].getPath());
+                }
             }
         }
         
         private void checkFeatures() {
+            indexFeatures = new ArrayList();
             Element root = new Element("lintra");
             Element action = new Element("action");
             action.setText("indexfeatures");
@@ -83,11 +101,30 @@ public class ContentClient {
                 while(iter.hasNext()) {
                     Element child = (Element)iter.next();
                     Element suffix = child.getChild("suffix");
-                    System.out.println("Suffix: " + suffix.getText());
+                    indexFeatures.add(suffix.getText());
                 }
             } catch(JDOMException e) {
                 System.err.println("Fehler beim XML: " + e);
             }
         }
+        
+        class OnlyAcceptedFiles implements FilenameFilter {
+            public boolean accept(File dir, String s) {
+                String teile[] = s.split("\\.");
+
+                Iterator iter = indexFeatures.iterator();
+                while(iter.hasNext()) {
+                    String endung = (String)iter.next();
+                    File f = new File(dir.getAbsolutePath() + "/" +  s);
+                    if(endung.equalsIgnoreCase(teile[teile.length-1])
+                        || f.isDirectory()) {
+                        return true;
+                    }
+                }
+                
+                return false;
+            }
+        }
+
     }
 }
