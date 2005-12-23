@@ -10,14 +10,19 @@
 
 package contentclient;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.*;
 import java.io.*;
+
+import javax.activation.MimetypesFileTypeMap;
 
 import org.jdom.*;
 import org.jdom.xpath.*;
 
 import contentclient.MainWindow;
 import org.linoratix.configfilereader.ConfigFileReader;
+import org.linoratix.base64.*;
 
 /**
  *
@@ -30,9 +35,10 @@ public class ContentClient {
     /** Creates a new instance of ContentClient */
     public ContentClient(String konfigurations_datei) {
         konfiguration = new ConfigFileReader(konfigurations_datei);
-        
+
         mWindow = new MainWindow(konfigurations_datei);
         mWindow.setVisible(true);
+
         new Indexer().start();
     }
     
@@ -86,7 +92,39 @@ public class ContentClient {
                     root.addContent(action);
                     
                     Element indexfile = new Element("indexfile");
+                    Element dateiname = new Element("dateiname");
+                    Element vonBenutzer = new Element("vonBenutzer");
+                    Element inhaltBinaer = new Element("inhaltBinaer");
+                    Element contentType = new Element("contentType");
                     
+                    dateiname.setText(dateien[i].getName());
+                    vonBenutzer.setText(System.getProperty("user.name"));
+                    
+                    try {
+                        InputStream in = new Base64.InputStream(
+                                new FileInputStream(dateien[i].getPath()));
+                        StringBuffer sb = new StringBuffer();
+                        int ch;
+                        while((ch = in.read()) > -1) {
+                            sb.append((char)ch);
+                        }
+                        in.close();
+                        inhaltBinaer.setText(sb.toString());
+                    } catch(IOException e) {
+                        System.err.println("Konnte Datei nicht lesen: " + e);
+                    }
+                    
+                    contentType.setText(new MimetypesFileTypeMap().getContentType(dateien[i]));
+                    
+                    indexfile.addContent(dateiname);
+                    indexfile.addContent(vonBenutzer);
+                    indexfile.addContent(inhaltBinaer);
+                    indexfile.addContent(contentType);
+                    
+                    root.addContent(indexfile);
+                    
+                    doc = new Document(root);
+                    Document recDoc = mWindow.sendRequest(doc);
                 }
             }
         }

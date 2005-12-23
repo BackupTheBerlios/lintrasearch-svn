@@ -45,6 +45,10 @@
  * @author rob@iharder.net
  * @version 2.1
  */
+
+package org.linoratix.base64;
+
+
 public class Base64
 {
     
