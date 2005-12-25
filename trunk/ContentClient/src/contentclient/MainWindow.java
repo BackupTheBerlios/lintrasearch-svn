@@ -20,6 +20,7 @@ import org.jdom.input.SAXBuilder;
 import org.jdom.output.XMLOutputter;
 
 import org.linoratix.configfilereader.ConfigFileReader;
+import org.linoratix.base64.*;
 
 /**
  *
@@ -600,6 +601,15 @@ public class MainWindow extends javax.swing.JFrame {
             doc = new Document(root);
             
             Document recDoc = sendRequest(doc);
+            // /lintra/getfile/datei   /dateiname
+            try {
+                Element datei = (Element)XPath.selectSingleNode(recDoc, "/lintra/getfile/datei");
+                Element dateiname = (Element)XPath.selectSingleNode(recDoc, "/lintra/getfile/dateiname");
+                Base64.decodeToFile(datei.getText(), konfiguration.get("/lintra/downloads/path") + "/" + dateiname.getText());
+            } catch(JDOMException e) {
+                System.err.println("Fehler bei der XPath Abfrage: " + e);
+            }
+            
         }
     }
     
