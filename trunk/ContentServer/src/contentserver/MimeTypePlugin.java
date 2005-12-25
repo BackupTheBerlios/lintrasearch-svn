@@ -22,7 +22,7 @@ public abstract class MimeTypePlugin {
         return null;
     }
     
-    public String getContent(byte[] _content) {
+    public String getContent(String _content) {
         return null;
     }
 }

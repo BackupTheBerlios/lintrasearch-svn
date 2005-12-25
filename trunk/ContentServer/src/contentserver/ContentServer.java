@@ -84,7 +84,7 @@ public class ContentServer {
         }
     }
     
-    private Document processRequest(Document doc) {
+    private Document processRequest(Document doc, Socket sock) {
         Document retDocument = null;
         
         Element root = doc.getRootElement();
@@ -96,10 +96,111 @@ public class ContentServer {
             // es soll gesucht werden
            retDocument = searchDB((Element)children.get(1));
         } else if(action.getText().equalsIgnoreCase("indexfeatures") == true) {
-           retDocument = getIndexFeatures();
+            retDocument = getIndexFeatures();
+        } else if(action.getText().equalsIgnoreCase("indexfile") == true) {
+            retDocument = indexFile((Element)children.get(1), sock);
+        } else if(action.getText().equalsIgnoreCase("getfile") == true) {
+            retDocument = getFile((Element)children.get(1));
         }
         
         return retDocument;
+    }
+    
+    private Document getFile(Element elem) {
+        Document doc = null;
+        Element root = new Element("lintra");
+        Element action = new Element("action");
+        action.setText("getfile");
+        root.addContent(action);
+        Element getfile = new Element("getfile");
+        Element datei = new Element("datei");
+        Element dateiname = new Element("dateiname");
+
+        Statement stmt = null;
+        ResultSet rs = null;
+        
+        try {
+            stmt = sql_connection.createStatement();
+            rs = stmt.executeQuery("SELECT dateiname, inhaltBinaer FROM dokumente WHERE docID=" + elem.getText());
+
+            while(rs.next()) {
+                datei.setText(rs.getString("inhaltBinaer"));
+                dateiname.setText(rs.getString("dateiname"));
+            }
+            
+            getfile.addContent(datei);
+            getfile.addContent(dateiname);
+        } catch (SQLException e) {
+            System.err.println("Fehler bei der SQL Abfrage: " + e);
+        }
+        
+        root.addContent(getfile);
+
+        doc = new Document(root);
+        
+        return doc;
+    }
+    
+    private Document indexFile(Element elem, Socket sock) {
+        Document retDoc = null;
+        Statement stmt = null;
+        
+        Element root = new Element("lintra");
+        Element action = new Element("action");
+        action.setText("indexfile");
+        Element indexfile = new Element("indexfile");
+        Element status = new Element("status");
+        
+        List plugin_list = konfiguration.getList("/lintra/plugins/mimetype/plugin");
+        Iterator iter = plugin_list.iterator();
+        
+        boolean found = false;
+        
+        while(iter.hasNext()) {
+            Element plugin = (Element)iter.next();
+            MimeTypePlugin mtp = null;
+            
+            try {
+                Class MimeTypePluginClass = Class.forName(plugin.getText());
+                Object MimeTypePluginObject = MimeTypePluginClass.newInstance();
+                mtp = (MimeTypePlugin)MimeTypePluginObject;
+            } catch(Exception e) {
+                System.err.println("Konnte Plugin nicht laden: " + e);
+            }
+            
+            Iterator mt_iter = mtp.getMimeType().iterator();
+            
+            while(mt_iter.hasNext()) {
+                MimeType mt = (MimeType)mt_iter.next();
+                if(mt.getMimeType().equalsIgnoreCase(elem.getChildText("contentType"))) {
+                    System.out.println("Plugin für content-type gefunden: " + mt.getMimeType());
+                    
+                    // und in Datenbank aufnehmen
+                    try {
+                        stmt = sql_connection.createStatement();
+                        stmt.executeUpdate("INSERT INTO dokumente (dateiname,vonIP,vonBenutzer,inhaltText,inhaltBinaer,contentType) " +
+                                "VALUES ('"+ elem.getChildText("dateiname") +"', '"+ sock.getInetAddress().getHostAddress() +"', '" + elem.getChildText("vonBenutzer") + "'" +
+                                ", '" + mtp.getContent(elem.getChildText("inhaltBinaer")) + "', '" + elem.getChildText("inhaltBinaer") + "', '"+ elem.getChildText("contentType") +"')");
+                    } catch(SQLException e) {
+                        System.err.println("Fehlerhafte SQL Abfrage: " + e);
+                    }
+                    
+                    found = true;
+                    break;
+                }
+            }
+            
+            if(found) break;
+        }
+        
+        status.setText("ok");
+        indexfile.addContent(status);
+        root.addContent(action);
+        root.addContent(indexfile);
+        
+        retDoc = new Document(root);
+        
+        return retDoc;
     }
     
     private Document searchDB(Element search_elem) {
@@ -316,7 +417,7 @@ public class ContentServer {
                 
                 String line;
                 
-                doc = processRequest((Document)is.readObject());
+                doc = processRequest((Document)is.readObject(), sock);
                 
                 XMLOutputter serializer = new XMLOutputter();
                 /// DEBUG

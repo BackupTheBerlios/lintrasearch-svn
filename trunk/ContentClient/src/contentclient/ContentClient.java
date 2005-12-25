@@ -74,10 +74,6 @@ public class ContentClient {
                 System.err.println("Konnte einfach nicht warten...");
             }
             
-            if(konfiguration.get("/lintra/develop/debug").equalsIgnoreCase("1") == true) {
-                System.out.println(">> Indexing: " + dir);
-            }
-            
             File[] dateien = new java.io.File(dir).listFiles(new OnlyAcceptedFiles());
             
             for(int i = 0; i < dateien.length; i++) {
@@ -101,8 +97,11 @@ public class ContentClient {
                     vonBenutzer.setText(System.getProperty("user.name"));
                     
                     try {
+                        if(konfiguration.get("/lintra/develop/debug").equalsIgnoreCase("1") == true) {
+                            System.out.println(">> Indexing: " + dateien[i]);
+                        }
                         InputStream in = new Base64.InputStream(
-                                new FileInputStream(dateien[i].getPath()));
+                                new FileInputStream(dateien[i]), Base64.ENCODE);
                         StringBuffer sb = new StringBuffer();
                         int ch;
                         while((ch = in.read()) > -1) {
@@ -110,21 +109,21 @@ public class ContentClient {
                         }
                         in.close();
                         inhaltBinaer.setText(sb.toString());
+                       
+                        contentType.setText(new MimetypesFileTypeMap().getContentType(dateien[i]));
+
+                        indexfile.addContent(dateiname);
+                        indexfile.addContent(vonBenutzer);
+                        indexfile.addContent(inhaltBinaer);
+                        indexfile.addContent(contentType);
+
+                        root.addContent(indexfile);
+
+                        doc = new Document(root);
+                        Document recDoc = mWindow.sendRequest(doc);
                     } catch(IOException e) {
-                        System.err.println("Konnte Datei nicht lesen: " + e);
+                        System.err.println("Konnte Datei "+dateien[i]+" nicht lesen: " + e);
                     }
-                    
-                    contentType.setText(new MimetypesFileTypeMap().getContentType(dateien[i]));
-                    
-                    indexfile.addContent(dateiname);
-                    indexfile.addContent(vonBenutzer);
-                    indexfile.addContent(inhaltBinaer);
-                    indexfile.addContent(contentType);
-                    
-                    root.addContent(indexfile);
-                    
-                    doc = new Document(root);
-                    Document recDoc = mWindow.sendRequest(doc);
                 }
             }
         }

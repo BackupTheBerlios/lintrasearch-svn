@@ -585,7 +585,21 @@ public class MainWindow extends javax.swing.JFrame {
         protected void panelMouseClicked(java.awt.event.MouseEvent evt) {
             if(konfiguration.get("/lintra/develop/debug").equalsIgnoreCase("1") == true) {
                 System.out.println("Klick auf id: " + data.getDocID());
-            }            
+            }
+            
+            Document doc = null;
+            Element root = new Element("lintra");
+            Element action = new Element("action");
+            action.setText("getfile");
+            root.addContent(action);
+            
+            Element getfile = new Element("getfile");
+            getfile.setText(String.valueOf(data.getDocID()));
+            root.addContent(getfile);
+            
+            doc = new Document(root);
+            
+            Document recDoc = sendRequest(doc);
         }
     }
     
