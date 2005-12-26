@@ -89,11 +89,13 @@ public class ContentClient {
                     
                     Element indexfile = new Element("indexfile");
                     Element dateiname = new Element("dateiname");
+                    Element pfad = new Element("pfad");
                     Element vonBenutzer = new Element("vonBenutzer");
                     Element inhaltBinaer = new Element("inhaltBinaer");
                     Element contentType = new Element("contentType");
                     
                     dateiname.setText(dateien[i].getName());
+                    pfad.setText(dateien[i].getParent());
                     vonBenutzer.setText(System.getProperty("user.name"));
                     
                     try {
@@ -116,6 +118,7 @@ public class ContentClient {
                         indexfile.addContent(vonBenutzer);
                         indexfile.addContent(inhaltBinaer);
                         indexfile.addContent(contentType);
+                        indexfile.addContent(pfad);
 
                         root.addContent(indexfile);
 

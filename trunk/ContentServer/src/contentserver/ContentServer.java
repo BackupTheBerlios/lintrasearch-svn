@@ -176,11 +176,19 @@ public class ContentServer {
                     System.out.println("Plugin für content-type gefunden: " + mt.getMimeType());
                     
                     // und in Datenbank aufnehmen
+                    if(fileExistsInDb(elem.getChildText("pfad"), elem.getChildText("dateiname"), sock.getInetAddress().getHostAddress())) {
+                        continue;
+                    }
                     try {
                         stmt = sql_connection.createStatement();
-                        stmt.executeUpdate("INSERT INTO dokumente (dateiname,vonIP,vonBenutzer,inhaltText,inhaltBinaer,contentType) " +
+                        if(pathExistsInDb(elem.getChildText("pfad")) == false) {
+                            stmt.executeUpdate("INSERT INTO pfade (pfad) VALUES('"+ elem.getChildText("pfad") +"')");
+                        }
+                        
+                        stmt.executeUpdate("INSERT INTO dokumente (dateiname,vonIP,vonBenutzer,inhaltText,inhaltBinaer,contentType,pfad) " +
                                 "VALUES ('"+ elem.getChildText("dateiname") +"', '"+ sock.getInetAddress().getHostAddress() +"', '" + elem.getChildText("vonBenutzer") + "'" +
-                                ", '" + mtp.getContent(elem.getChildText("inhaltBinaer")) + "', '" + elem.getChildText("inhaltBinaer") + "', '"+ elem.getChildText("contentType") +"')");
+                                ", '" + mtp.getContent(elem.getChildText("inhaltBinaer")) + "', '" + elem.getChildText("inhaltBinaer") + "', '"+ elem.getChildText("contentType") +"', " +
+                                ""+getPathinTable(elem.getChildText("pfad"))+")");
                     } catch(SQLException e) {
                         System.err.println("Fehlerhafte SQL Abfrage: " + e);
                     }
@@ -201,6 +209,62 @@ public class ContentServer {
         retDoc = new Document(root);
         
         return retDoc;
+    }
+    
+    private int getPathinTable(String path) {
+        Statement stmt = null;
+        ResultSet rs = null;
+        boolean ret = false;
+        
+        try {
+            stmt = sql_connection.createStatement();
+            rs = stmt.executeQuery("SELECT * FROM pfade WHERE pfad='"+path+"'");
+            while(rs.next()) {
+                return rs.getInt("pid");
+            }
+        } catch(SQLException e) {
+            System.err.println("Fehlerhafte SQL Abfrage: " + e);
+        }
+        
+        return -1;
+    }
+    
+    private boolean pathExistsInDb(String path) {
+        Statement stmt = null;
+        ResultSet rs = null;
+        boolean ret = false;
+        
+        try {
+            stmt = sql_connection.createStatement();
+            rs = stmt.executeQuery("SELECT * FROM pfade WHERE pfad='"+path+"'");
+            while(rs.next()) {
+                ret = true;
+            }
+        } catch(SQLException e) {
+            System.err.println("Fehlerhafte SQL Abfrage: " + e);
+        }
+        
+        return ret;        
+    }
+    
+    private boolean fileExistsInDb(String path, String file, String vonIP) {
+        Statement stmt = null;
+        ResultSet rs = null;
+        boolean ret = false;
+        
+        try {
+            stmt = sql_connection.createStatement();
+            rs = stmt.executeQuery("SELECT * FROM dokumente " +
+                    "INNER JOIN pfade ON dokumente.pfad=pfade.pid " +
+                    "WHERE dokumente.dateiname='"+ file +"' AND pfade.pfad='"+ path +"' AND dokumente.vonIP='"+vonIP+"'");
+            while(rs.next()) {
+                ret = true;
+            }
+        } catch(SQLException e) {
+            System.err.println("Fehlerhafte SQL Abfrage: " + e);
+        }
+        
+        return ret;
     }
     
     private Document searchDB(Element search_elem) {
