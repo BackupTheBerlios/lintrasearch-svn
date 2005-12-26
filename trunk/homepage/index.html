@@ -1,0 +1,33 @@
+<html>
+<head>
+	<title>Linoratix Intranet Search :: Home</title>
+</head>
+<body>
+	<h1>WTF?</h1>
+	<p>Linoratix Intranet Search is a Desktopsearch alike tool for indexing all the documents in your network.</p>
+	
+	<h1>Requirements</h1>
+	<p>
+		<ul>
+			<li><a href="http://java.sun.com/">Java 1.5+</a></li>
+			<li><a href="http://www.mysql.com/">MySQL 4+</a></li>
+		</ul>
+	</p>
+	
+	<h1>Howto install it</h1>
+	<p>First download the <a href="lintrasearch-0.1.zip">zip-archiv</a>.</p>
+	<h2>On the server side</h2>
+	<p>Create a new MySQL Database and an user for this database.<br />Use the table.sql file inside the zip-archiv to create all needed tables.</p>
+	<pre class="code">
+mysql -uUSER -pPASSWORD database < /path/to/archiv/install/tables.sql
+	</pre>
+	<p>Create a directory where you store the server's configuration file "server.xml" (for example /etc/lintrasearch)<br />
+	Copy the file install/server.xml into that directory and edit this file.</p>
+	<p>Now create an init script to start the server during boot. You can use startServer.sh to see how to start the server.</p>
+	<h2>On the client side</h2>
+	<p>Create a directory lintrasearch inside your Homedirectory and copy the file install/client.xml to that directory. Edit this file to suit your needs.</p>
+	<p>Copy the icons directory to the lintrasearch directory in your Homedirectory.</p>
+	<h1>Howto run the client</h1>
+	<p>See startClient.sh script to see how to start the client.</p>
+</body>
+</html>

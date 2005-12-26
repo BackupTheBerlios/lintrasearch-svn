@@ -42,6 +42,10 @@ public class MainWindow extends javax.swing.JFrame {
         konfiguration = new ConfigFileReader(konfigurations_datei);
         
         initComponents();
+        
+        btnSucheSpeichern.setIcon(new javax.swing.ImageIcon(konfiguration.get("/lintra/gui/icons") + "/save_search_40x40.gif"));
+        btnSuchen.setIcon(new javax.swing.ImageIcon(konfiguration.get("/lintra/gui/icons") + "/go_search_40x40.gif"));
+        
         this.setSize(640, 380);
         
         pnlAnswers.setBackground(new Color(255, 255, 255));
