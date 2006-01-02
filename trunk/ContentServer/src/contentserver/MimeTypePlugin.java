@@ -25,4 +25,16 @@ public abstract class MimeTypePlugin {
     public String getContent(String _content) {
         return null;
     }
+    
+    public String[] getMultipleContent(String _content) {
+        return null;
+    }
+    
+    public String[] getMultipleBinaryContent(String _content) {
+        return null;
+    }
+    
+    public boolean isMultipleContent() {
+        return false;
+    }
 }

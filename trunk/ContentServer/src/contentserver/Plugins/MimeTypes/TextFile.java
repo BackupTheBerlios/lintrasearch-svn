@@ -3,26 +3,21 @@
  *
  * Created on December 21, 2005, 8:36 AM
  *
- * To change this template, choose Tools | Options and locate the template under
- * the Source Creation and Management node. Right-click the template and choose
- * Open. You can then make changes to the template in the Source Editor.
+ * Index Textfiles
  */
 
 package contentserver.Plugins.MimeTypes;
 
+// Import some lintrasearch classes
 import contentserver.MimeTypePlugin;
 import contentserver.MimeType;
-
-import java.util.*;
-import java.io.*;
-
 import org.linoratix.base64.*;
 
-/**
- *
- * @author jfried
- */
+import java.util.*;
+
 public class TextFile extends MimeTypePlugin {
+    
+    // Method to register a mimetype to the server
     public ArrayList getMimeType() {
         ArrayList l = new ArrayList();
         l.add(new MimeType("text/plain", "txt"));
@@ -30,6 +25,7 @@ public class TextFile extends MimeTypePlugin {
         return l;
     }
     
+    // method to get the content of the document in text format 
     public String getContent(String _content) {
         StringBuilder sb = new StringBuilder();
         byte[] inhalt = Base64.decode(_content);
@@ -38,5 +34,9 @@ public class TextFile extends MimeTypePlugin {
         }
         
         return sb.toString();
+    }
+    
+    public boolean isMultipleContent() {
+        return false;
     }
 }

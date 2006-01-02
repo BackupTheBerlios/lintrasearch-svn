@@ -1,5 +1,17 @@
 <html>
 <head>
+	<style type="text/css">
+	<!--
+	body {color: #000000; background-color: #ffffff; font-family: Monospaced}
+	table {color: #804040; background-color: #e0e0e0; font-family: Monospaced}
+	.line-number {color: #804040; background-color: #e0e0e0}
+	.java-block-comment {color: #737373}
+	.java-string-literal {color: #99006b}
+	.java-layer-method {font-family: Monospaced; font-weight: bold}
+	.java-keywords {color: #000099; font-family: Monospaced; font-weight: bold}
+	.java-numeric-literals {color: #780000}
+	-->
+	</style>
 	<title>Linoratix Intranet Search :: Home</title>
 </head>
 <body>
@@ -15,7 +27,7 @@
 	</p>
 	
 	<h1>Howto install it</h1>
-	<p>First download the <a href="lintrasearch-0.1.zip">zip-archiv</a>.</p>
+	<p>First download the <a href="http://developer.berlios.de/project/showfiles.php?group_id=5601">zip-archiv</a>.</p>
 	<h2>On the server side</h2>
 	<p>Create a new MySQL Database and an user for this database.<br />Use the table.sql file inside the zip-archiv to create all needed tables.</p>
 	<pre class="code">
@@ -29,5 +41,51 @@ mysql -uUSER -pPASSWORD database < /path/to/archiv/install/tables.sql
 	<p>Copy the icons directory to the lintrasearch directory in your Homedirectory.</p>
 	<h1>Howto run the client</h1>
 	<p>See startClient.sh script to see how to start the client.</p>
+	<h1>Screenshots</h1>
+	<p><img src="client2.png" border="0" /></p>
+	<h1>Howto write plugins</h1>
+	<p>Writing plugins is as easy as eating your lunch ;-)</p>
+	<p>An example Plugin:</p>
+	<pre class="code">
+<span class="line-number"> 1</span> <span class="java-block-comment">/*</span>
+<span class="line-number"> 2</span> <span class="java-block-comment"> * TextFile.java</span>
+<span class="line-number"> 3</span> <span class="java-block-comment"> *</span>
+<span class="line-number"> 4</span> <span class="java-block-comment"> * Created on December 21, 2005, 8:36 AM</span>
+<span class="line-number"> 5</span> <span class="java-block-comment"> *</span>
+<span class="line-number"> 6</span> <span class="java-block-comment"> * Index Textfiles</span>
+<span class="line-number"> 7</span> <span class="java-block-comment"> */</span>
+<span class="line-number"> 8</span> 
+<span class="line-number"> 9</span> <span class="java-keywords">package</span> contentserver.Plugins.MimeTypes;
+<span class="line-number">10</span> 
+<span class="line-number">11</span> <span class="java-block-comment">// Import some lintrasearch classes</span>
+<span class="line-number">12</span> <span class="java-keywords">import</span> contentserver.MimeTypePlugin;
+<span class="line-number">13</span> <span class="java-keywords">import</span> contentserver.MimeType;
+<span class="line-number">14</span> <span class="java-keywords">import</span> org.linoratix.base64.*;
+<span class="line-number">15</span> 
+<span class="line-number">16</span> <span class="java-keywords">import</span> java.util.*;
+<span class="line-number">17</span> 
+<span class="line-number">18</span> <span class="java-keywords">public</span> <span class="java-keywords">class</span> TextFile <span class="java-keywords">extends</span> MimeTypePlugin {
+<span class="line-number">19</span>     
+<span class="line-number">20</span>     <span class="java-block-comment">// Method to register a mimetype to the server</span>
+<span class="line-number">21</span>     <span class="java-keywords">public</span> ArrayList <span class="java-layer-method">getMimeType</span>() {
+<span class="line-number">22</span>         ArrayList l = <span class="java-keywords">new</span> <span class="java-layer-method">ArrayList</span>();
+<span class="line-number">23</span>         l.<span class="java-layer-method">add</span>(<span class="java-keywords">new</span> <span class="java-layer-method">MimeType</span>(<span class="java-string-literal">"text/plain"</span>, <span class="java-string-literal">"txt"</span>));
+<span class="line-number">24</span>         
+<span class="line-number">25</span>         <span class="java-keywords">return</span> l;
+<span class="line-number">26</span>     }
+<span class="line-number">27</span>     
+<span class="line-number">28</span>     <span class="java-block-comment">// method to get the content of the document in text format </span>
+<span class="line-number">29</span>     <span class="java-keywords">public</span> String <span class="java-layer-method">getContent</span>(String _content) {
+<span class="line-number">30</span>         StringBuilder sb = <span class="java-keywords">new</span> <span class="java-layer-method">StringBuilder</span>();
+<span class="line-number">31</span>         <span class="java-keywords">byte</span>[] inhalt = Base64.<span class="java-layer-method">decode</span>(_content);
+<span class="line-number">32</span>         <span class="java-keywords">for</span>(<span class="java-keywords">int</span> i = <span class="java-numeric-literals">0</span>; i &lt; inhalt.length; i++) {
+<span class="line-number">33</span>             sb.<span class="java-layer-method">append</span>((<span class="java-keywords">char</span>)inhalt[i]);
+<span class="line-number">34</span>         }
+<span class="line-number">35</span>         
+<span class="line-number">36</span>         <span class="java-keywords">return</span> sb.<span class="java-layer-method">toString</span>();
+<span class="line-number">37</span>     }
+<span class="line-number">38</span> }
+<span class="line-number">39</span> 
+	</pre>
 </body>
 </html>

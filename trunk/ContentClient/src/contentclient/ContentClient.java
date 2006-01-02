@@ -59,9 +59,16 @@ public class ContentClient {
             
             List verzeichnisse = konfiguration.getList("/lintra/indexer/path");
             
-            for(int i=0; i<verzeichnisse.size(); i++) {
-                Element e = (Element)verzeichnisse.get(i);
-                indexVerzeichnis(e.getTextTrim());
+            while(true) {
+                for(int i=0; i<verzeichnisse.size(); i++) {
+                    Element e = (Element)verzeichnisse.get(i);
+                    indexVerzeichnis(e.getTextTrim());
+                }
+                try {
+                    Thread.sleep(1000000);
+                } catch(InterruptedException e) {
+                    System.err.println("Konnte einfach nicht warten...");
+                }
             }
         }
         

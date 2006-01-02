@@ -180,15 +180,19 @@ public class ContentServer {
                         continue;
                     }
                     try {
-                        stmt = sql_connection.createStatement();
-                        if(pathExistsInDb(elem.getChildText("pfad")) == false) {
-                            stmt.executeUpdate("INSERT INTO pfade (pfad) VALUES('"+ elem.getChildText("pfad") +"')");
+                        if(mtp.isMultipleContent()) {
+                            
+                        } else {
+                            stmt = sql_connection.createStatement();
+                            if(pathExistsInDb(elem.getChildText("pfad")) == false) {
+                                stmt.executeUpdate("INSERT INTO pfade (pfad) VALUES('"+ elem.getChildText("pfad") +"')");
+                            }
+
+                            stmt.executeUpdate("INSERT INTO dokumente (dateiname,vonIP,vonBenutzer,inhaltText,inhaltBinaer,contentType,pfad) " +
+                                    "VALUES ('"+ elem.getChildText("dateiname") +"', '"+ sock.getInetAddress().getHostAddress() +"', '" + elem.getChildText("vonBenutzer") + "'" +
+                                    ", '" + escapeString(mtp.getContent(elem.getChildText("inhaltBinaer"))) + "', '" + elem.getChildText("inhaltBinaer") + "', '"+ elem.getChildText("contentType") +"', " +
+                                    ""+getPathinTable(elem.getChildText("pfad"))+")");
                         }
-                        
-                        stmt.executeUpdate("INSERT INTO dokumente (dateiname,vonIP,vonBenutzer,inhaltText,inhaltBinaer,contentType,pfad) " +
-                                "VALUES ('"+ elem.getChildText("dateiname") +"', '"+ sock.getInetAddress().getHostAddress() +"', '" + elem.getChildText("vonBenutzer") + "'" +
-                                ", '" + mtp.getContent(elem.getChildText("inhaltBinaer")) + "', '" + elem.getChildText("inhaltBinaer") + "', '"+ elem.getChildText("contentType") +"', " +
-                                ""+getPathinTable(elem.getChildText("pfad"))+")");
                     } catch(SQLException e) {
                         System.err.println("Fehlerhafte SQL Abfrage: " + e);
                     }
@@ -209,6 +213,12 @@ public class ContentServer {
         retDoc = new Document(root);
         
         return retDoc;
+    }
+    
+    private String escapeString(String s) {
+        s = s.replaceAll("'", "_");
+        
+        return s;
     }
     
     private int getPathinTable(String path) {
