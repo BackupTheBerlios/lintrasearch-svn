@@ -164,6 +164,7 @@ public class ContentServer {
                 Class MimeTypePluginClass = Class.forName(plugin.getText());
                 Object MimeTypePluginObject = MimeTypePluginClass.newInstance();
                 mtp = (MimeTypePlugin)MimeTypePluginObject;
+                mtp.setConfiguration(konfiguration);
             } catch(Exception e) {
                 System.err.println("Konnte Plugin nicht laden: " + e);
             }

@@ -17,6 +17,7 @@ import org.linoratix.base64.*;
 
 import java.util.*;
 import java.util.regex.*;
+import java.io.*;
 
 public class HtmlFile extends MimeTypePlugin {
     
@@ -34,24 +35,41 @@ public class HtmlFile extends MimeTypePlugin {
     // method to get the content of the document in text format 
     public String getContent(String _content) {
         StringBuffer sb = new StringBuffer();
-        
         byte[] inhalt = Base64.decode(_content);
         for(int i = 0; i < inhalt.length; i++) {
             sb.append((char)inhalt[i]);
         }
         
-        String patt = "<.*?>";
-        Pattern r = Pattern.compile(patt);
-        Matcher m = r.matcher(sb);
-        
-        m.reset();
-        while(m.find()) {
-            m.appendReplacement(sb, "");
+        Properties replacingProperties = new Properties ();
+        try {
+            replacingProperties.load (
+                new BufferedInputStream (new FileInputStream(konfiguration.get("/lintra/files/configuration/plugins") + "/html2txt.rpl")));
+        } catch (final IOException exitException) {
+            System.err.println ("Fehler beim Laden der Ersetzungstabelle." + exitException);
+            System.exit (-1);
         }
         
-        m.appendTail(sb);
+        StringBuffer inputString = sb;
+        Enumeration replacingStrings = replacingProperties.keys();
+
+        while (replacingStrings.hasMoreElements()) {
+            final String codingString = replacingStrings.nextElement().toString();
+            final Pattern p = Pattern.compile (codingString);
+            Matcher m = p.matcher(inputString);
+            if (m.find()) {
+                inputString = new StringBuffer (m.replaceAll (replacingProperties.getProperty(codingString)));
+            }
+        }
         
-        return sb.toString();
+        Pattern htmlTagPattern = Pattern.compile("<[^>]*>|\\s{2,}");
+        String [] preText = htmlTagPattern.split (inputString);
+        StringBuffer retBuf = new StringBuffer();
+        
+        for (int i = 0; i < preText.length; i++) {
+            retBuf.append(preText[i]);
+        }
+        
+        return retBuf.toString();
     }
     
     public boolean isMultipleContent() {

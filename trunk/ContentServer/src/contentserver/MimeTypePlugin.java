@@ -10,6 +10,7 @@
 
 package contentserver;
 
+import org.linoratix.configfilereader.ConfigFileReader;
 import java.util.*;
 
 /**
@@ -17,6 +18,8 @@ import java.util.*;
  * @author jfried
  */
 public abstract class MimeTypePlugin {
+    public ConfigFileReader konfiguration = null;
+    
     // In dieser Methode werden die MimeTypes bekannt gegeben
     public ArrayList getMimeType() {
         return null;
@@ -36,5 +39,9 @@ public abstract class MimeTypePlugin {
     
     public boolean isMultipleContent() {
         return false;
+    }
+    
+    public void setConfiguration(ConfigFileReader k) {
+        konfiguration = k;
     }
 }
