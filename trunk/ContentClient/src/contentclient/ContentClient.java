@@ -17,6 +17,9 @@ import java.io.*;
 
 import javax.activation.MimetypesFileTypeMap;
 
+import org.clapper.util.misc.MIMETypeUtil.*;
+import org.clapper.util.misc.MIMETypeUtil;
+        
 import org.jdom.*;
 import org.jdom.xpath.*;
 
@@ -65,7 +68,7 @@ public class ContentClient {
                     indexVerzeichnis(e.getTextTrim());
                 }
                 try {
-                    Thread.sleep(1000000);
+                    Thread.sleep(100000); // Long.getLong(konfiguration.get("/lintra/indexer/wait"))
                 } catch(InterruptedException e) {
                     System.err.println("Konnte einfach nicht warten...");
                 }
@@ -119,7 +122,8 @@ public class ContentClient {
                         in.close();
                         inhaltBinaer.setText(sb.toString());
                        
-                        contentType.setText(new MimetypesFileTypeMap().getContentType(dateien[i]));
+                        //contentType.setText(new MimetypesFileTypeMap().getContentType(dateien[i]));
+                        contentType.setText(getMimeTypeOfFile(dateien[i].getAbsolutePath()));
 
                         indexfile.addContent(dateiname);
                         indexfile.addContent(vonBenutzer);
@@ -155,7 +159,7 @@ public class ContentClient {
 
                 while(iter.hasNext()) {
                     Element child = (Element)iter.next();
-                    Element suffix = child.getChild("suffix");
+                    Element suffix = child.getChild("mimetype");
                     indexFeatures.add(suffix.getText());
                 }
             } catch(JDOMException e) {
@@ -163,19 +167,58 @@ public class ContentClient {
             }
         }
         
+        public String getMimeTypeOfFile(String f)
+        {
+            String foundMimeType = "";
+            Runtime r = Runtime.getRuntime();
+            
+            try {
+                String fileName = f;
+
+                System.out.println("File: " + fileName);
+                Process p = r.exec(konfiguration.get("/lintra/indexer/executable") + " " + fileName);
+                BufferedReader procout = new BufferedReader(
+                        new InputStreamReader(p.getInputStream())
+                        );
+                
+                foundMimeType = procout.readLine();
+
+                p.waitFor();
+            } catch(IOException e) {
+                System.err.println("Error executin file -bi: " + e);
+            } catch(InterruptedException e) {
+                System.err.println("Fehler: " +e);
+            }
+
+            String[] mimeTypeTeile = foundMimeType.split(";");
+            
+            return mimeTypeTeile[0];
+        }
+        
         class OnlyAcceptedFiles implements FilenameFilter {
             public boolean accept(File dir, String s) {
                 String teile[] = s.split("\\.");
+                String foundMimeType = "";
 
                 Iterator iter = indexFeatures.iterator();
+                
                 while(iter.hasNext()) {
-                    String endung = (String)iter.next();
+                    String mtype = (String)iter.next();
                     File f = new File(dir.getAbsolutePath() + "/" +  s);
-                    if(endung.equalsIgnoreCase(teile[teile.length-1])
-                        || f.isDirectory()) {
-                        return true;
+                    
+                    foundMimeType = getMimeTypeOfFile(dir.getAbsolutePath() + "/" +  s);
+                    
+                    try {
+                        if(mtype.equalsIgnoreCase(foundMimeType)
+                            || f.isDirectory()) {
+                            return true;
+                        }
+                    } catch(Exception e) {
+                        System.err.println("Errno: MM_0: " + e);
+                        System.exit(-1);
                     }
                 }
+                
                 
                 return false;
             }
