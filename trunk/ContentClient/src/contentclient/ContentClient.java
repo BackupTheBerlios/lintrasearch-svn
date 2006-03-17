@@ -14,11 +14,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
 import java.io.*;
-
-import javax.activation.MimetypesFileTypeMap;
-
-import org.clapper.util.misc.MIMETypeUtil.*;
-import org.clapper.util.misc.MIMETypeUtil;
         
 import org.jdom.*;
 import org.jdom.xpath.*;

@@ -2,7 +2,7 @@
 
 CONF_FILE=${HOME}/.lintrasearch/conf/client.xml
 JAVA_PATH=/opt/jre1.5.0_06
-#JAVA_PATH=/usr
+JAVA_PATH=/usr
 
 export CLASSPATH=`pwd`/lib
 

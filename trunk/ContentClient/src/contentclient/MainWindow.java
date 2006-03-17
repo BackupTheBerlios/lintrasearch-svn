@@ -513,10 +513,10 @@ public class MainWindow extends javax.swing.JFrame {
             setLayout(null);
 
             // jLabel1.setIcon(new javax.swing.ImageIcon("/home/jfried/.lintrasearch/icons/xls.gif"));
-            String[] s = erg.getDateiName().split("\\.");
+            String[] s = erg.getContentType().split("/");
             
             javax.swing.JLabel lblResultIcon = new javax.swing.JLabel();
-            lblResultIcon.setIcon(new javax.swing.ImageIcon(konfiguration.get("/lintra/gui/icons") + "/"+ s[s.length - 1] +".gif"));
+            lblResultIcon.setIcon(new javax.swing.ImageIcon(konfiguration.get("/lintra/gui/icons") + "/"+ s[0] + "_" + s[1] +".gif"));
             lblResultIcon.setText("");
             lblResultIcon.setLocation(10, 4);
             lblResultIcon.setSize(32, 32);
