@@ -170,13 +170,19 @@ public class ContentClient {
             try {
                 String fileName = f;
 
-                System.out.println("File: " + fileName);
-                Process p = r.exec(konfiguration.get("/lintra/indexer/executable") + " " + fileName);
+                if(konfiguration.get("/lintra/develop/debug").equalsIgnoreCase("1") == true) {
+                    System.out.println("File: " + fileName);
+                }
+                Process p = r.exec(konfiguration.get("/lintra/extern/file") + " " + fileName);
                 BufferedReader procout = new BufferedReader(
                         new InputStreamReader(p.getInputStream())
                         );
                 
                 foundMimeType = procout.readLine();
+                
+                if(konfiguration.get("/lintra/develop/debug").equalsIgnoreCase("1") == true) {
+                    System.out.println("mime_type: " + foundMimeType);
+                }
 
                 p.waitFor();
             } catch(IOException e) {
