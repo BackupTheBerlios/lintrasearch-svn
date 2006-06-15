@@ -516,7 +516,16 @@ public class MainWindow extends javax.swing.JFrame {
             String[] s = erg.getContentType().split("/");
             
             javax.swing.JLabel lblResultIcon = new javax.swing.JLabel();
-            lblResultIcon.setIcon(new javax.swing.ImageIcon(konfiguration.get("/lintra/gui/icons") + "/"+ s[0] + "_" + s[1] +".gif"));
+            File pic = new File(konfiguration.get("/lintra/gui/icons") + "/"+ s[0] + "_" + s[1] +".gif");
+            if(pic.exists())
+            {            
+                lblResultIcon.setIcon(new javax.swing.ImageIcon(konfiguration.get("/lintra/gui/icons") + "/"+ s[0] + "_" + s[1] +".gif"));
+            } else
+            {
+                String teile[] = ((String)erg.getDateiName()).split("\\.");
+                
+                lblResultIcon.setIcon(new javax.swing.ImageIcon(konfiguration.get("/lintra/gui/icons") + "/"+ teile[teile.length-1] +".gif"));
+            }
             lblResultIcon.setText("");
             lblResultIcon.setLocation(10, 4);
             lblResultIcon.setSize(32, 32);
