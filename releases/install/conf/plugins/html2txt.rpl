@@ -1,0 +1,21 @@
+# ersetzungstabelle fuer html
+# von=nach
+&trade;=(tm)
+&amp;=\u00DF
+&reg;=(r)
+&Auml;=\u00C4
+&para;=
+&uuml;=\u00FC
+&copy;=(c)
+&raquo;=>>
+&Uuml;=\u00DC
+&ouml;=\u00F6
+<br>=\n\r
+&lt;=<
+&quot;="
+&laquo;=<<
+&Ouml;=\u00D6
+&szlig;=\u00DF
+&auml;=\u00E4
+<p>=\n\r\n\r
+

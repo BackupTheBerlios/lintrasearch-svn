@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lintra>
+	<db>
+		<type>mysql</type>
+		<server>localhost</server>
+		<name>lintrasearch</name>
+		<user>root</user>
+		<password></password>
+	</db>
+	<server>
+		<port>1055</port>
+	</server>
+	<plugins>
+		<mimetype>
+			<plugin>contentserver.Plugins.MimeTypes.TextFile</plugin>
+			<plugin>contentserver.Plugins.MimeTypes.HtmlFile</plugin>
+			<plugin>contentserver.Plugins.MimeTypes.OpenOffice</plugin>
+		</mimetype>
+	</plugins>
+	<files>
+		<configuration>
+			<plugins>/home/jfried/.lintrasearch/conf/plugins</plugins>
+		</configuration>
+	</files>
+	<extern>
+		<oo2txt>/usr/local/bin/oo2txt</oo2txt>
+	</extern>
+</lintra>
