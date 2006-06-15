@@ -155,7 +155,8 @@ public class ContentClient {
                 while(iter.hasNext()) {
                     Element child = (Element)iter.next();
                     Element suffix = child.getChild("mimetype");
-                    indexFeatures.add(suffix.getText());
+//                    indexFeatures.add(suffix.getText());
+                    indexFeatures.add(child);
                 }
             } catch(JDOMException e) {
                 System.err.println("Fehler beim XML: " + e);
@@ -204,13 +205,16 @@ public class ContentClient {
                 Iterator iter = indexFeatures.iterator();
                 
                 while(iter.hasNext()) {
-                    String mtype = (String)iter.next();
+                    Element mimetype = (Element)iter.next();
+                    String mtype = (String)mimetype.getChild("mimetype").getText();
+                    String fsuffix = (String)mimetype.getChild("suffix").getText();
+                    
                     File f = new File(dir.getAbsolutePath() + "/" +  s);
                     
                     foundMimeType = getMimeTypeOfFile(dir.getAbsolutePath() + "/" +  s);
                     
                     try {
-                        if(mtype.equalsIgnoreCase(foundMimeType)
+                        if((mtype.equalsIgnoreCase(foundMimeType) && teile[teile.length-1].equalsIgnoreCase(fsuffix))
                             || f.isDirectory()) {
                             return true;
                         }
